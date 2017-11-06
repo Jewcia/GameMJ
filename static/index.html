@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Gra</title>
+    <script src="Libs/three.js"></script>
+    <script src="Three/Scena.js"></script>
+    <script src="Three/Items.js"></script>
+    <script src="Three/Text.js"></script>
+    <script src="Three/bigCreations.js"></script>
+    <script src="font/helvetiker_regular.typeface.js"></script>
+    <script src="Libs/Socket.js"></script>
+    <script src="Net/Net.js"></script>
+    <script src="Three/stages.js"></script>
+    <script src="Three/Model.js"></script>
+    <script src="Three/ray.js"></script>
+    <script src="Interface/startScreen.js"></script>
+    <style>
+    *{
+        margin:0;
+        padding:0;
+    }
+    table{
+        border-collapse: collapse;
+    }
+    th{
+        border: 2px solid black;
+        padding:5px;
+        width:22%;
+        background-color: #6B061C;
+    }
+    td{
+        background-color: #912038;
+        border: 1px solid black;
+        padding:2px;
+    }
+    #info{
+        margin-left: auto ;
+        margin-right: auto ;
+        position:relative;
+    }
+    #info *{
+        margin-left: auto ;
+        margin-right: auto ;
+        text-align: center;
+    }
+    #start{
+        bottom:10%;
+        position:absolute;
+        width:100%;
+        height:5%;
+        font-size: 30px;
+        font-family: monospace;
+        background-color: #68C05A;
+    }
+    #register{
+        bottom:5%;
+        position:absolute;
+        width:100%;
+        height:5%;
+        font-size: 30px;
+        font-family: monospace;
+        background-color: #296E78;
+    }
+    #instructions{
+        bottom:0;
+        position:absolute;
+        width:100%;
+        height:5%;
+        font-size: 30px;
+        font-family: monospace;
+        background-color: #A56123;
+    }
+    #Login{
+        bottom:70%;
+        position:absolute;
+        width:100%;
+        border:none;
+        height:5%;
+        font-size: 30px;
+        font-family: monospace;
+    }
+    #Password{
+        bottom:60%;
+        position:absolute;
+        width:100%;
+        height:5%;
+        border:none;
+        font-size: 30px;
+        font-family: monospace;
+    }
+    #Stage{
+        bottom:35%;
+        left:50%;
+        position:absolute;
+        height:5%;
+        font-size: 30px;
+        font-family: monospace;
+        transform:translate(-50%);
+    }
+    label{
+        font-size: 50px;
+        font-family: monospace;
+        bottom:40%;
+        left:50%;
+        position:absolute;
+        transform:translate(-50%);
+    }
+    ol{
+        position:absolute;
+        bottom:30%;
+        left:50%;
+        transform:translate(-50%);
+    }
+    ol *{
+        display:inline;
+    }
+    li{
+        font-size: 30px;
+        border:2px solid black;
+        padding:5px;
+        background-color: #A1C322;
+    }
+    span{
+        position:relative;
+        left:10px;
+
+    }
+    </style>
+    <script>
+    window.addEventListener("load",function(){
+        stage=-1
+        startS()
+        login = ""
+        net = new Net();
+        var whichUser=0//used in createAction
+        var start=document.getElementById("start")
+        start.addEventListener("click",function(){
+            login=document.getElementById('Login').value
+            var pass=document.getElementById('Password').value
+            if(login!="" && pass!="" && stage!=-1){
+                net.login(login, pass, stage)
+                document.getElementById('Login').disabled = true
+                document.getElementById('Password').disabled = true
+                document.getElementById('start').disabled = true
+                document.getElementById('register').disabled = true
+            }
+            else{
+                alert("Podaj login, hasło i Poziom")
+                login=pass=""
+            }
+        })
+        document.getElementById("register").addEventListener("click", function () {
+            var login = document.getElementById('Login').value
+            var pass = document.getElementById('Password').value
+            if (login != "" && pass != "") {
+                net.register(login, pass)
+                document.getElementById('Login').disabled = true
+                document.getElementById('Password').disabled = true
+                document.getElementById('start').disabled = true
+                document.getElementById('register').disabled = true
+            }
+            else {
+                alert("Podaj login i hasło")
+            }
+        })
+        document.getElementById("instructions").addEventListener("click", function () {
+            var inst=document.createElement("div");
+            var cont=document.getElementById("content")
+            var w=window.innerWidth
+            var h=window.innerHeight
+            inst.style.width=w+"px";
+            inst.style.height=h+"px"
+            inst.style.backgroundColor="#840B1E"
+            inst.style.color="#F6DBE0"
+            inst.style.textAlign="left"
+            inst.style.fontSize=15+"px"
+            inst.style.fontFamily="Monospace"
+            inst.style.position="absolute"
+            inst.style.top=0
+            inst.style.left=0
+            inst.innerHTML="Controls:<br><span>WASD-Move</span><br><span>QE-Move camera up/down</span><br><span>LMB-Click</span><br><br>How to Win:<br><span>1.Solve the mathematical operation. The result will indicate which column/row is the right one.</span><br><span>2.Show your answer to the second player by clicking on the number you got, you can show many possible answers. By clicking once, the number will turn yellow. By clicking two times the number turns green. Even after clicking two times, you can still choose another possible answer.</span><br><span>3.You have got 3 lives, you loose one when you click on the wrong floor tile. You win by clicking the tile at the intersection of the row and the column you got from your math operations.</span> "
+            document.body.appendChild(inst)
+            window.onresize=function(){//matching the size of the browser
+                var w=window.innerWidth
+                var h=window.innerHeight
+                inst.style.width=w+"px"
+                inst.style.height=h+"px"
+            }
+            var but5=document.createElement("button");
+            but5.style.width=100+"px"
+            but5.style.height=50+"px"
+            but5.style.backgroundColor="#C6E46F"
+            but5.style.position="absolute"
+            but5.style.bottom=0+"%"
+            but5.style.left=20+"%"
+            but5.style.transform="translate(-50%,-50%)";
+            but5.style.textAlign="center"
+            but5.style.fontSize=20+"px"
+            but5.style.fontFamily="Monospace"
+            but5.innerHTML="Back"
+            inst.appendChild(but5)
+            but5.addEventListener("click",function(){
+                inst.parentNode.removeChild(inst);
+            },true)
+        })
+    })
+    </script>
+</head>
+<body>
+    <div id="content">
+        <div id="info">
+            <div id="start">Start</div>
+            <div id="register">Register</div>
+            <div id="instructions">Instructions</div>
+            <input type="text" id="Login" placeholder="Login"></input>
+            <input type="password" id="Password" placeholder="Password"></input>
+            <label>Stage</label>
+            <ol>
+                <li id="li1">1</li>
+                <li id="li2">2</li>
+                <li id="li3">3</li>
+                <li id="li4">4</li>
+                <li id="li5">5</li>
+                <li id="li6">6</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</hmtl>
